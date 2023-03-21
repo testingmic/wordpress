@@ -14,7 +14,7 @@
 */
 if (defined('ABSPATH') && function_exists('add_action')) {
 
-    defined('HEATMAP_APP_URL') or define('HEATMAP_APP_URL', 'https://devdashboard.heatmap.com/index.php?format=json&module=API&method=PaymentIntegration.getIdByURL');
+    defined('HEATMAP_APP_URL') or define('HEATMAP_APP_URL', 'http://localhost/index.php?format=json&module=API&method=PaymentIntegration.getIdByURL');
 
     register_activation_hook(
         __FILE__,
@@ -59,14 +59,26 @@ if (defined('ABSPATH') && function_exists('add_action')) {
 
     }
 
-    function heatmapCURL($apiURL, $data = []) {
-        $ch = curl_init( $apiURL );
-        curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode($data) );
-        curl_setopt( $ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
-        $result = curl_exec($ch);
-        curl_close($ch);
-        return $result;
+    function heatmapCURL($apiURL, $data = [], $method = 'POST') {
+        try {
+            $request = (new WP_Http_Curl)->request($apiURL, [
+                'method'        => $method,
+                'timeout'       => 10,
+                'body'          => $data,
+                'stream'        => 0,
+                'filename'      => null,
+                'decompress'    => false,
+                'headers'       => [
+                    'User-Agent' => $_SERVER["HTTP_USER_AGENT"],
+                    'Content:Type: application/json'
+                ]
+            ]);
+
+            return $request['body'] ?? "";
+            
+        } catch(\Exception $e) {
+            return "";
+        }
     }
     
     function heatmapGetIdSite($url, $return = false, $plainURL = null) {
@@ -75,16 +87,18 @@ if (defined('ABSPATH') && function_exists('add_action')) {
 
         if(empty($heatData) || $return) {
 
-            $content = file_get_contents($url);
+            $content = heatmapCURL($url, [], 'GET');
             if( empty($content) ) {
                 return;
             }
 
+            $content = sanitize_text_field($content);
             $content = json_decode($content, true);
             
-            if(!$return) {
+            if(!$return && isset($content['idsite'])) {
                 $content['heatURL'] = $plainURL;
-                update_option('_heatmap_data', json_encode($content));
+                $content['heatLastUpdated'] = time();
+                update_option('_heatmap_data', wp_json_encode($content));
             }
 
             if($return) {
@@ -112,6 +126,9 @@ if (defined('ABSPATH') && function_exists('add_action')) {
         if($getIdSite) {
             return heatmapGetIdSite($apiURL, true, $heatURL);
         }
+
+        $idSite = heatmapGetIdSite($apiURL, false, $heatURL);
+        if($idSite > 0) {
         ?>
         <script>
             var _paq = window._paq = window._paq || [];
@@ -120,11 +137,11 @@ if (defined('ABSPATH') && function_exists('add_action')) {
             (function() {
                 _paq.push(['setTrackerUrl', heatUrl+'sttracker.php']);
                 var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-                g.async=true; g.src=heatUrl+'heatmap.js?sid=<?= heatmapGetIdSite($apiURL, false, $heatURL) ?>'; s.parentNode.insertBefore(g,s);
+                g.async=true; g.src=heatUrl+'heatmap.js?sid=<?= $idSite ?>'; s.parentNode.insertBefore(g,s);
             })();
         </script>
         <?php
-
+        }
     }
 
     function heatmapTrackOrder( $order_id ) {
@@ -133,7 +150,8 @@ if (defined('ABSPATH') && function_exists('add_action')) {
             return;
         }
 
-        $apiData = heatmapHeatagScript(true);
+        $apiData = get_option('_heatmap_data');
+        $apiData = !is_array($apiData) ? json_decode($apiData, true) : $apiData;
 
         if(isset($apiData['idsite'])) {
 
@@ -146,7 +164,7 @@ if (defined('ABSPATH') && function_exists('add_action')) {
                 'idorder'   => $order_id,
                 'idsite'     => $apiData['idsite'],
                 'status'    => 'completed',
-                '_id'       => $apiData['_id']['visitorId'] ?? ($_COOKIE['mr_vid'] ?? null),
+                '_id'       => $_COOKIE['mr_vid'] ?? null,
                 'revenue'   => $revenue,
                 'quicktransaction' => 1,
                 'device_type' => $_SERVER['HTTP_USER_AGENT'] ?? null
@@ -170,7 +188,7 @@ if (defined('ABSPATH') && function_exists('add_action')) {
             $order_data['items'] = $items;
 
             // push the data to the api
-            heatmapCURL($apiData['apiURL'] . "sttracker.php", $order_data);
+            heatmapCURL(heatmapURL(HEATMAP_APP_URL, true) . "/sttracker.php", json_encode($order_data));
 
         }
 
