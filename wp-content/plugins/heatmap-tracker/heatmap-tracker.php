@@ -14,9 +14,6 @@
 */
 if (defined('ABSPATH') && function_exists('add_action')) {
 
-    add_action('wp_head', 'heatmapHeatagScript');
-    add_action('woocommerce_checkout_order_processed', 'heatmapTrackOrder', 10, 1);
-
     defined('HEATMAP_APP_URL') or define('HEATMAP_APP_URL', 'https://devdashboard.heatmap.com/index.php?format=json&module=API&method=PaymentIntegration.getIdByURL');
 
     register_activation_hook(
@@ -29,12 +26,24 @@ if (defined('ABSPATH') && function_exists('add_action')) {
         'heatmapDeActivateHeatmap'
     );
 
+    register_uninstall_hook(
+        __FILE__,
+        'heatmapDeActivateHeatmap'
+    );
+
+    add_action('wp_head', 'heatmapHeatagScript');
+    add_action('woocommerce_checkout_order_processed', 'heatmapTrackOrder', 10, 1);
+
     function heatmapActivateHeatmap() {
-        
+        heatmapHeatagScript(true);
     }
 
     function heatmapDeActivateHeatmap() {
-        delete_option('_heatmap_data');
+        $option_name = '_heatmap_data';
+
+        delete_option( $option_name );
+        
+        delete_site_option( $option_name );
     }
 
     function heatmapURL($url, $hostOnly = false) {
@@ -161,4 +170,11 @@ if (defined('ABSPATH') && function_exists('add_action')) {
             $order_data['items'] = $items;
 
             // push the data to the api
-            hea
+            heatmapCURL($apiData['apiURL'] . "sttracker.php", $order_data);
+
+        }
+
+    }
+
+}
+?>
