@@ -1,2 +1,6 @@
 <?php
-# Silence is golden.
+/**
+ * @package HeatmapTracker
+ * 
+ * Silence is golden.
+ */

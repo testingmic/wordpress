@@ -1,5 +1,8 @@
 <?php
-// if uninstall.php is not called by WordPress, die
+/**
+ * Trigger this file on Plugin uninstall
+ * @package HeatmapTracker
+ */
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
     die;
 }
