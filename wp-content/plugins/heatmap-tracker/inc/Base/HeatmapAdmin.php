@@ -37,6 +37,7 @@ class HeatmapAdmin extends HeatmapTracker {
         else {
             $content = $this->HeatmapHeatagScript(true);
             if(isset($content['idsite'])) {
+                $content['heatLastTimestamp'] = time();
                 $content['heatLastUpdated'] = date('l, F, jS Y');
                 update_option($this->option_name, json_encode($content));
             }
