@@ -5,21 +5,39 @@ use WP_Http_Curl;
 
 use Inc\Base\HeatmapAdmin;
 
-final class HeatmapTracker {
+class HeatmapTracker {
+
+    public $plugin;
+	public $plugin_url;
+    public $plugin_label = 'Heamap Tracker';
+    public $plugin_name = 'heatmap-tracker';
+
+    public $description = 'Heatmap.com is a premium heatmap solution that tracks revenue from clicks, 
+        scroll-depth, and any customer interaction on your website. 
+        Heatmap.com gives you access to on-site metrics that you can’t see in any other heatmap solutions, 
+        primarily around revenue attribution.';
+
+    public function __construct() {
+    
+        $this->plugin_url = plugin_dir_url(dirname(__FILE__, 2));
+        $this->plugin = plugin_basename(dirname(__FILE__, 3)) . '/heatmap-tracker.php';
+
+    }
 
 	public function init() {
 
-        add_action('wp_head', [$this, 'heatmapHeatagScript'], 10);
-        add_action('woocommerce_checkout_order_processed', [$this, 'heatmapTrackOrder'], 10, 1);
+        add_action('wp_head', [$this, 'HeatmapHeatagScript'], 10);
+        add_action('woocommerce_checkout_order_processed', [$this, 'HeatmapTrackOrder'], 10, 1);
 
-        if(current_user_can('activate_plugins')) {            
+        if(current_user_can('activate_plugins')) {      
             $adminObject = new HeatmapAdmin();
-            add_action('admin_menu', [$adminObject, 'heatmapAdminMenu'], 9);
+            add_filter( 'plugin_action_links_' . plugin_basename(dirname(__FILE__, 3)), [$adminObject, 'HeatmapAdminSettingLink'] );
+            add_action('admin_menu', [$adminObject, 'HeatmapAdminMenu'], 9);
         }
 
     }
 
-    private function heatmapURL($url, $hostOnly = false) {
+    private function HeatmapURL($url, $hostOnly = false) {
 
         $parse = parse_url($url);
         $url = ($parse['scheme'] ?? "https") . "://" . $parse['host'] . (
@@ -32,7 +50,7 @@ final class HeatmapTracker {
     
     }
     
-    private function heatmapCURL($apiURL, $data = [], $method = 'POST') {
+    private function HeatmapCURL($apiURL, $data = [], $method = 'POST') {
         
         try {
 
@@ -57,13 +75,13 @@ final class HeatmapTracker {
 
     }
     
-    private function heatmapGetIdSite($url, $return = false, $plainURL = null) {
+    private function HeatmapGetIdSite($url, $return = false, $plainURL = null) {
     
         $heatData = !$return ? get_option('_heatmap_data') : null;
     
         if(empty($heatData) || $return) {
     
-            $content = $this->heatmapCURL($url, [], 'GET');
+            $content = $this->HeatmapCURL($url, [], 'GET');
             if( empty($content) ) {
                 return;
             }
@@ -91,19 +109,19 @@ final class HeatmapTracker {
     
     }
     
-    public function heatmapHeatagScript($getIdSite = false) {
+    public function HeatmapHeatagScript($getIdSite = false) {
     
         $apiURL = HEATMAP_APP_URL;
         $apiURL .= "&getId=1&url=" . get_site_url();
     
-        $heatURL = $this->heatmapURL($apiURL, true);
+        $heatURL = $this->HeatmapURL($apiURL, true);
         $heatURL = trim($heatURL, '/') . '/';
     
         if($getIdSite) {
-            return $this->heatmapGetIdSite($apiURL, true, $heatURL);
+            return $this->HeatmapGetIdSite($apiURL, true, $heatURL);
         }
     
-        $idSite = $this->heatmapGetIdSite($apiURL, false, $heatURL);
+        $idSite = $this->HeatmapGetIdSite($apiURL, false, $heatURL);
         if($idSite > 0) {
         ?>
         <script>
@@ -120,7 +138,7 @@ final class HeatmapTracker {
         }
     }
 
-    public function heatmapTrackOrder( $order_id ) {
+    public function HeatmapTrackOrder( $order_id ) {
 
         if ( !$order_id ) {
             return;
@@ -164,7 +182,7 @@ final class HeatmapTracker {
             $order_data['items'] = $items;
     
             // push the data to the api
-            $this->heatmapCURL($this->heatmapURL(HEATMAP_APP_URL, true) . "/sttracker.php", json_encode($order_data));
+            $this->HeatmapCURL($this->HeatmapURL(HEATMAP_APP_URL, true) . "/sttracker.php", json_encode($order_data));
     
         }
     

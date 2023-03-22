@@ -28,6 +28,12 @@ if(!function_exists('wp_get_current_user')) {
 
 defined('HEATMAP_APP_URL') or define('HEATMAP_APP_URL', 'http://localhost/index.php?module=API&method=PaymentIntegration.getIdByURL');
 
+// Include the main HeatmapTracker class.
+if ( ! defined( 'HT_PLUGIN_FILE' ) ) {
+	define( 'HT_PLUGIN_FILE', __DIR__ );
+}
+
+
 function heatmapActivateHeatmap() {
 	HeatmapActivate::activate();
 }
