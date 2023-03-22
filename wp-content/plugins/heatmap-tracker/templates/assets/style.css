@@ -10,3 +10,38 @@
     border-bottom: solid 1px #f0f0f1;
     padding-bottom: 15px;
 }
+
+.heatmap-wrapper .wrapper-body {
+    display: flex;
+}
+
+.heatmap-wrapper .wrapper-body .content {
+    width: 100%;
+    padding: 10px;
+}
+
+.heatmap-wrapper .wrapper-body ul {
+    display: block;
+    padding-left: 20px;
+    list-style: square !important;
+}
+
+.heatmap-wrapper .strong {
+    font-weight: bold;
+}
+
+.heatmap-wrapper .info {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-left-width: 4px;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    padding: 10px;
+}
+
+.heatmap-wrapper .info.notice-success {
+    border-left-color: #00a32a;
+}
+
+.heatmap-wrapper .info.notice-error {
+    border-left-color: #d63638;
+}

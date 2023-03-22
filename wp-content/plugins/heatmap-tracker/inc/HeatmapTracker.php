@@ -9,13 +9,13 @@ class HeatmapTracker {
 
     public $plugin;
 	public $plugin_url;
+    public $plugin_option;
+    public $site_name = 'Heatmap.com';
     public $plugin_label = 'Heamap Tracker';
     public $plugin_name = 'heatmap-tracker';
 
     public $description = 'Heatmap.com is a premium heatmap solution that tracks revenue from clicks, 
-        scroll-depth, and any customer interaction on your website. 
-        Heatmap.com gives you access to on-site metrics that you can’t see in any other heatmap solutions, 
-        primarily around revenue attribution.';
+        scroll-depth, and any customer interaction on your website.';
 
     public function __construct() {
     
@@ -26,8 +26,12 @@ class HeatmapTracker {
 
 	public function init() {
 
-        add_action('wp_head', [$this, 'HeatmapHeatagScript'], 10);
-        add_action('woocommerce_checkout_order_processed', [$this, 'HeatmapTrackOrder'], 10, 1);
+        $this->plugin_option = get_option('_heatmap_data');
+
+        if(!empty($this->plugin_option)) {
+            add_action('wp_head', [$this, 'HeatmapHeatagScript'], 10);
+            add_action('woocommerce_checkout_order_processed', [$this, 'HeatmapTrackOrder'], 10, 1);
+        }
 
         if(current_user_can('activate_plugins')) {      
             $adminObject = new HeatmapAdmin();
@@ -77,7 +81,7 @@ class HeatmapTracker {
     
     private function HeatmapGetIdSite($url, $return = false, $plainURL = null) {
     
-        $heatData = !$return ? get_option('_heatmap_data') : null;
+        $heatData = !$return ? $this->plugin_option : null;
     
         if(empty($heatData) || $return) {
     

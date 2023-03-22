@@ -22,7 +22,9 @@ class HeatmapAdmin extends HeatmapTracker {
 
     public function DisplayHeatmapAdminDashboard() {
         $variables = [
-            'description' => $this->description
+            'site_name'     => $this->site_name,
+            'description'   => $this->description,
+            'plugin_option' => $this->plugin_option
         ];
         require_once HT_PLUGIN_FILE . '/templates/heatmap-tracker-settings.php';
     }
