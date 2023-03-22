@@ -20,14 +20,46 @@ class HeatmapAdmin extends HeatmapTracker {
         return $links;
     }
 
+    public function HeatmapManageSettings() {
+
+        if(!isset($_POST['status'])) {
+            wp_die("unknown_request");
+        }
+
+        $status = (int) substr($_POST['status'], 0, 2);
+        if(!in_array($status, [1, 2])) {
+            wp_die("unknown_request");
+        }
+
+        if($status == 2) {
+            update_option($this->option_name, '');
+        }
+        else {
+            $content = $this->HeatmapHeatagScript(true);
+            if(isset($content['idsite'])) {
+                $content['heatLastUpdated'] = date('l, F, jS Y');
+                update_option($this->option_name, json_encode($content));
+            }
+        }
+
+        flush_rewrite_rules();
+
+        wp_die("option_updated");
+    }
+
     public function DisplayHeatmapAdminDashboard() {
+        
+        $plugin_option = get_option('_heatmap_data');
+        $plugin_option = !empty($plugin_option) ? json_decode($plugin_option, true) : [];
+
         $variables = [
+            'plugin_url'    => $this->plugin_url,
+            'plugin_name'   => $this->plugin_name,
             'site_name'     => $this->site_name,
             'description'   => $this->description,
-            'plugin_option' => $this->plugin_option
+            'plugin_option' => $plugin_option
         ];
         require_once HT_PLUGIN_FILE . '/templates/heatmap-tracker-settings.php';
     }
-
 }
 ?>

@@ -11,6 +11,7 @@ class HeatmapTracker {
 	public $plugin_url;
     public $plugin_option;
     public $site_name = 'Heatmap.com';
+    public $option_name = '_heatmap_data';
     public $plugin_label = 'Heamap Tracker';
     public $plugin_name = 'heatmap-tracker';
 
@@ -35,8 +36,9 @@ class HeatmapTracker {
 
         if(current_user_can('activate_plugins')) {      
             $adminObject = new HeatmapAdmin();
-            add_filter( 'plugin_action_links_' . HT_PLUGIN_ROOT_DIR, [$adminObject, 'HeatmapAdminSettingLink'] );
+            add_filter('plugin_action_links_' . HT_PLUGIN_ROOT_DIR, [$adminObject, 'HeatmapAdminSettingLink']);
             add_action('admin_menu', [$adminObject, 'HeatmapAdminMenu'], 9);
+            add_action('wp_ajax_HeatmapManageSettings', [$adminObject, 'HeatmapManageSettings']);
         }
 
     }

@@ -6,6 +6,19 @@
     padding-top: 5px;
 }
 
+.heatmap-wrapper #logo-link {
+    display: inline-flex;
+    gap: 5px;
+    height: 100%;
+    place-items: center;
+    clear: both;
+}
+
+.heatmap-wrapper .text-secondary {
+    color: #00c191;
+    font-size: 1.3rem;
+}
+
 .heatmap-wrapper .wrapper-header {
     border-bottom: solid 1px #f0f0f1;
     padding-bottom: 15px;
@@ -13,11 +26,25 @@
 
 .heatmap-wrapper .wrapper-body {
     display: flex;
+    align-items: flex-start
 }
 
 .heatmap-wrapper .wrapper-body .content {
-    width: 100%;
+    width: 50%;
     padding: 10px;
+}
+
+.heatmap-wrapper .pad-right {
+    min-width: 100px!important;
+}
+
+@media screen and (max-width:782px){
+    .heatmap-wrapper .wrapper-body {
+        display: block;
+    }
+    .heatmap-wrapper .wrapper-body .content {
+        width: 100% !important;
+    }
 }
 
 .heatmap-wrapper .wrapper-body ul {
@@ -39,7 +66,7 @@
 }
 
 .heatmap-wrapper .info.notice-success {
-    border-left-color: #00a32a;
+    border-left-color: #00c191;
 }
 
 .heatmap-wrapper .info.notice-error {

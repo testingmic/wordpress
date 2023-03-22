@@ -1,27 +1,13 @@
 <div class="wrap">
     <div class="heatmap-wrapper">
         <div class="wrapper-header">
-            <h2>Heatmap Tracker</h2>
-            <?= $variables['description']; ?>
+            <div id="logo-link" class="flex items-center gap-3">
+                <img src="<?= $variables['plugin_url'] . $variables['plugin_name'] ?>/templates/assets/Vector.svg" alt="">
+                <p class="text-secondary"><?= $variables['site_name'] ?></p>
+            </div>
+            <div><?= $variables['description']; ?></div>
         </div>
         <div class="wrapper-body">
-            <div class="content">
-                <?php settings_errors(); ?>
-                
-                <?php if(empty($variables['plugin_option'])) { ?>
-                    <div class="info notice-error settings-error"> 
-                        <strong>You have not yet agreed to the terms to collect information from your users.</strong>
-                    </div>
-                <?php } ?>
-                
-                <form method="POST" action="options.php">
-                    <?php
-                    settings_fields('plugin_name_general_settings');
-                    do_settings_sections('plugin_name_general_settings');
-                    ?>
-                    <?php submit_button(); ?>
-                </form>
-            </div>
             <div class="content">
                 <div>
                     <strong><?= $variables['site_name'] ?></strong> gives you access to on-site metrics that you can’t see in 
@@ -43,6 +29,71 @@
                     <strong><em>(https://<?= strtolower($variables['site_name']) ?>)</em></strong>
                     for insertion into the database and further processing to generate reports for you.
                 </div>
+            </div>
+            <div class="content">
+                <?php settings_errors(); ?>
+                <?php if(empty($variables['plugin_option'])) { ?>
+                    <div class="info notice-error settings-error"> 
+                        <strong>You have not yet agreed to the terms to track users activities.</strong>
+                    </div>
+                    <div>
+                        <p>
+                            <input disabled type="hidden" id="heat_admin_answer" value="1">
+                            <button type="submit" data-heatmap_plugin="activate" name="submit" id="submit" class="button button-primary">Enable Tracking</button>
+                        </p>
+                    </div>
+                <?php } else { ?>
+                    <div class="info notice-success settings-error"> 
+                        <strong>Thanks for agreeing to the terms, tracking snippet has been injected into your website.</strong>
+                        <div style="margin-top:10px">
+                            <strong>
+                                <span class="pad-right">Site URL:</span>
+                            </strong> 
+                            <?= $variables['plugin_option']['site_url']; ?>
+                        </div>
+                        <div>
+                            <strong>
+                                <span class="pad-right">ID Site:</span>
+                            </strong> 
+                            <?= $variables['plugin_option']['idsite']; ?>
+                        </div>
+                        <div>
+                            <strong>
+                                <span class="pad-right">Site Name:</span>
+                            </strong> 
+                            <?= $variables['plugin_option']['name']; ?>
+                        </div>
+                        <div>
+                            <strong>
+                                <span class="pad-right">Enabled Since:</span>
+                            </strong> 
+                            <?= $variables['plugin_option']['heatLastUpdated']; ?>
+                        </div>
+                    </div>
+                    <div>
+                        <p>
+                            <input type="hidden" disabled id="heat_admin_answer" value="2">
+                            <button type="submit" data-heatmap_plugin="activate" name="submit" id="submit" class="button button-danger">Disable Tracking</button>
+                        </p>
+                    </div>
+                <?php } ?>
+                <script>
+                    jQuery(document).ready(function($) {
+                        $(`button[data-heatmap_plugin="activate"]`).on("click", function() {
+                            let status = $(`input[id="heat_admin_answer"]`).val();
+                            $(`button[data-heatmap_plugin="activate"]`).prop("disabled", true);
+                            $.post(`<?= admin_url('admin-ajax.php'); ?>`, {action: 'HeatmapManageSettings', status}).then((response) => {
+                                if(response == 'option_updated') {
+                                    window.location.href = "";
+                                } else {
+                                    $(`button[data-heatmap_plugin="activate"]`).prop("disabled", false);
+                                }
+                            }).fail((err) => {
+                                $(`button[data-heatmap_plugin="activate"]`).prop("disabled", false);
+                            });
+                        });
+                    });
+                </script>
             </div>
         </div>
     </div>
