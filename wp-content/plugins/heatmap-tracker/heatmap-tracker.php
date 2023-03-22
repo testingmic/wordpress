@@ -31,8 +31,8 @@ defined('HEATMAP_APP_URL') or define('HEATMAP_APP_URL', 'http://localhost/index.
 // Include the main HeatmapTracker class.
 if ( ! defined( 'HT_PLUGIN_FILE' ) ) {
 	define( 'HT_PLUGIN_FILE', __DIR__ );
+	define( 'HT_PLUGIN_ROOT_DIR', plugin_basename(__FILE__));
 }
-
 
 function heatmapActivateHeatmap() {
 	HeatmapActivate::activate();
@@ -44,7 +44,7 @@ function heatmapDeActivateHeatmap() {
 
 register_activation_hook(__FILE__, 'heatmapActivateHeatmap');
 register_deactivation_hook(__FILE__, 'heatmapDeActivateHeatmap');
-
+  
 if( class_exists('Inc\\HeatmapTracker')) {
 	(new HeatmapTracker)->init();
 }

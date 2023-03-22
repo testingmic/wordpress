@@ -31,7 +31,7 @@ class HeatmapTracker {
 
         if(current_user_can('activate_plugins')) {      
             $adminObject = new HeatmapAdmin();
-            add_filter( 'plugin_action_links_' . plugin_basename(dirname(__FILE__, 3)), [$adminObject, 'HeatmapAdminSettingLink'] );
+            add_filter( 'plugin_action_links_' . HT_PLUGIN_ROOT_DIR, [$adminObject, 'HeatmapAdminSettingLink'] );
             add_action('admin_menu', [$adminObject, 'HeatmapAdminMenu'], 9);
         }
 

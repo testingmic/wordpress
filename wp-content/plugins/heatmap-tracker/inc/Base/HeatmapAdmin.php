@@ -13,18 +13,18 @@ class HeatmapAdmin extends HeatmapTracker {
         wp_enqueue_style('evelynpos', $this->plugin_url . $this->plugin_name . '/templates/assets/style.css');
     }
 
+    public function HeatmapAdminSettingLink( array $links ) {
+        $url = get_admin_url() . "admin.php?page={$this->plugin_name}";
+        $settings_link = '<a href="' . $url . '">' . __('Settings', 'textdomain') . '</a>';
+          $links[] = $settings_link;
+        return $links;
+    }
+
     public function DisplayHeatmapAdminDashboard() {
         $variables = [
             'description' => $this->description
         ];
         require_once HT_PLUGIN_FILE . '/templates/heatmap-tracker-settings.php';
-    }
-
-    public function HeatmapAdminSettingLink( array $links ) {
-        $url = get_admin_url() . "options-general.php?page={$this->plugin_name}";
-        $settings_link = '<a href="' . $url . '">' . __('Settings', 'textdomain') . '</a>';
-          $links[] = $settings_link;
-        return $links;
     }
 
 }
