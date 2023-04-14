@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Heatmap Tracker
+ * Plugin Name: Heatmap Revenue Tracker
  * Plugin URI: https://heatmap.com/
  * Description: Heatmap.com is a premium heatmap solution that tracks revenue from clicks, scroll-depth, and any customer interaction on your website. Heatmap.com gives you access to on-site metrics that you can’t see in any other heatmap solutions, primarily around revenue attribution.
  * Version: 1.1

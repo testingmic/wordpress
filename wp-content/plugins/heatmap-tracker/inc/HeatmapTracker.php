@@ -27,11 +27,20 @@ class HeatmapTracker {
 
 	public function init() {
 
-        $this->plugin_option = get_option('_heatmap_data');
+        $this->plugin_option = get_option($this->option_name);
 
         if(!empty($this->plugin_option)) {
             add_action('wp_head', [$this, 'HeatmapHeatagScript'], 10);
-            add_action('woocommerce_checkout_order_processed', [$this, 'HeatmapTrackOrder'], 10, 1);
+            add_action('woocommerce_checkout_order_processed', [$this, 'HeatmapTrackOrder'], 5, 1);
+
+            foreach(['refunded', 'failed', 'cancelled', 'completed'] as $status) {
+                $actionHook = "woocommerce_order_status_{$status}";
+                $modelName = "HeatmapOrder" . ucwords($status);
+                if(method_exists($this, $modelName)) {
+                    add_action($actionHook, [$this, $modelName], 5, 1);
+                }
+            }
+
         }
 
         if(current_user_can('activate_plugins')) {      
@@ -98,7 +107,7 @@ class HeatmapTracker {
             if(!$return && isset($content['idsite'])) {
                 $content['heatURL'] = $plainURL;
                 $content['heatLastUpdated'] = time();
-                update_option('_heatmap_data', wp_json_encode($content));
+                update_option($this->option_name, wp_json_encode($content));
             }
     
             if($return) {
@@ -150,7 +159,7 @@ class HeatmapTracker {
             return;
         }
     
-        $apiData = get_option('_heatmap_data');
+        $apiData = get_option($this->option_name);
         $apiData = !is_array($apiData) ? json_decode($apiData, true) : $apiData;
     
         if(isset($apiData['idsite'])) {
@@ -161,13 +170,13 @@ class HeatmapTracker {
             $revenue = $order->get_total();
             
             $order_data = [
-                'idorder'   => $order_id,
-                'idsite'     => $apiData['idsite'],
-                'status'    => 'completed',
-                '_id'       => $_COOKIE['mr_vid'] ?? null,
-                'revenue'   => $revenue,
-                'quicktransaction' => 1,
-                'device_type' => $_SERVER['HTTP_USER_AGENT'] ?? null
+                'idorder'           => $order_id,
+                'idsite'            => $apiData['idsite'],
+                'status'            => 'completed',
+                '_id'               => $_COOKIE['mr_vid'] ?? null,
+                'revenue'           => $revenue,
+                'quicktransaction'  => 1,
+                'device_type'       => $_SERVER['HTTP_USER_AGENT'] ?? null
             ];
     
             $items = [];
@@ -192,6 +201,48 @@ class HeatmapTracker {
     
         }
     
+    }
+
+    public function HeatmapOrderCompleted( $order_id ) {
+        return $this->HeatmapChangeOrderStatus($order_id, 'completed');
+    }
+
+    public function HeatmapOrderRefunded( $order_id ) {
+        return $this->HeatmapChangeOrderStatus($order_id, 'refunded');
+    }
+
+    public function HeatmapOrderFailed( $order_id ) {
+        return $this->HeatmapChangeOrderStatus($order_id, 'failed');
+    }
+
+    public function HeatmapOrderCancelled( $order_id ) {
+        return $this->HeatmapChangeOrderStatus($order_id, 'cancelled');
+    }
+
+    public function HeatmapChangeOrderStatus($order_id, $status) {
+
+        if ( !$order_id ) {
+            return;
+        }
+
+        $apiData = get_option($this->option_name);
+        $apiData = !is_array($apiData) ? json_decode($apiData, true) : $apiData;
+
+        if(isset($apiData['idsite'])) {
+
+            $order_data = [
+                'status'            => $status,
+                'idorder'           => $order_id,
+                'idsite'            => $apiData['idsite'],
+                'hook'              => $status,
+                'quicktransaction'  => 1
+            ];
+
+            // push the data to the api
+            $this->HeatmapCURL($this->HeatmapURL(HEATMAP_APP_URL, true) . "/sttracker.php", json_encode($order_data));
+
+        }
+
     }
     
 }
