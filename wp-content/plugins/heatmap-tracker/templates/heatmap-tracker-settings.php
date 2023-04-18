@@ -10,15 +10,12 @@
         <div class="wrapper-body">
             <div class="content">
                 <div>
-                    <strong><?= $variables['site_name'] ?></strong> gives you access to on-site metrics that you can’t see in 
-                    any other heatmap solutions, primarily around revenue attribution.
+                    <strong><?= $variables['site_name'] ?></strong> provides unique access to on-site metrics that are not available in other heatmap solutions, with a primary focus on revenue attribution. Our platform allows you to track:
                     <ul>
-                        <li>Users interaction with your pages related to scrolls.</li>
-                        <li>Normal and rage clicks on links and other elements on the page.</li>
-                        <li>All <strong>Customer Orders</strong> processed with <strong>WooCommerce</strong></li>
-                        <li>Overall time spent on page</li>
+                        <li>Users interaction with your pages including scrolls, normal and rage clicks on links and other elements.</li>
+                        <li>We also collect data on customer orders processed with WooCommerce,</li>
+                        <li>Overall time spent on page, and save a minimal amount of information in the user's browser localStorage.</li>
                     </ul>
-                    In doing so, a <strong>very tiny bit</strong> of information is saved in the user's browser localStorage.
                     <p class="strong">The data collected enables us to:</p>
                     <ul>
                         <li>Attribute Revenue to all elements on website pages that users interacted with.</li>

@@ -50,7 +50,7 @@ class HeatmapAdmin extends HeatmapTracker {
 
     public function DisplayHeatmapAdminDashboard() {
         
-        $plugin_option = get_option('_heatmap_data');
+        $plugin_option = get_option($this->option_name);
         $plugin_option = !empty($plugin_option) ? json_decode($plugin_option, true) : [];
 
         $variables = [
