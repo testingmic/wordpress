@@ -32,11 +32,14 @@ class HeatmapAdmin extends HeatmapTracker {
         }
 
         if($status == 2) {
+            $message = "option_updated";
             update_option($this->option_name, '');
         }
         else {
+            $message = "verification_failed";
             $content = $this->HeatmapHeatagScript(true);
             if(isset($content['idsite'])) {
+                $message = "option_updated";
                 $content['heatLastTimestamp'] = time();
                 $content['heatLastUpdated'] = date('l, F, jS Y');
                 update_option($this->option_name, json_encode($content));
@@ -45,7 +48,7 @@ class HeatmapAdmin extends HeatmapTracker {
 
         flush_rewrite_rules();
 
-        wp_die("option_updated");
+        wp_die($message);
     }
 
     public function DisplayHeatmapAdminDashboard() {

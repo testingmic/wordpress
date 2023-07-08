@@ -26,7 +26,7 @@ if(!function_exists('wp_get_current_user')) {
     include(ABSPATH . "wp-includes/pluggable.php"); 
 }
 
-defined('HEATMAP_APP_URL') or define('HEATMAP_APP_URL', 'https://dashboard.heatmap.com/index.php?module=API&method=PaymentIntegration.getIdByURL&platform=wordpress');
+defined('HEATMAP_APP_URL') or define('HEATMAP_APP_URL', 'http://localhost/index.php?module=API&method=PaymentIntegration.getIdByURL&platform=wordpress');
 
 // Include the main HeatmapTracker class.
 if ( ! defined( 'HT_PLUGIN_FILE' ) ) {

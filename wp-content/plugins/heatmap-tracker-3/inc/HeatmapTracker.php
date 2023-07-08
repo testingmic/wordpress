@@ -14,6 +14,10 @@ class HeatmapTracker {
     public $option_name = '_heatmap_data';
     public $plugin_label = 'Heatmap.com';
     public $plugin_name = 'heatmap-tracker';
+    private $action_hooks = [
+        'woocommerce_checkout_order_processed' => 'HeatmapWoocommerceOrder',
+        'edd_complete_purchase' => 'HeatmapEasyDigitalOrder'
+    ];
 
     public $description = 'Heatmap.com is a premium heatmap solution that tracks revenue from clicks, 
         scroll-depth, and any customer interaction on your website.';
@@ -31,14 +35,11 @@ class HeatmapTracker {
 
         if(!empty($this->plugin_option)) {
             add_action('wp_head', [$this, 'HeatmapHeatagScript'], 10);
-            if ( has_action( 'woocommerce_checkout_order_processed' ) ) {
-                add_action('woocommerce_checkout_order_processed', [$this, 'HeatmapTrackOrder'], 5, 1);
-            }
-            if( has_action('woocommerce_checkout_order_processed') ) {
-                add_action('edd_complete_purchase', ['pw_edd_on_complete_purchase']);
+            foreach($this->action_hooks as $action => $method) {
+                add_action($action, [$this, $method], 5, 1);
             }
 
-            foreach(['refunded', 'failed', 'cancelled', 'completed'] as $status) {
+            foreach(['refunded', 'cancelled'] as $status) {
                 $actionHook = "woocommerce_order_status_{$status}";
                 $modelName = "HeatmapOrder" . ucwords($status);
                 if(method_exists($this, $modelName)) {
@@ -166,14 +167,33 @@ class HeatmapTracker {
         }
     }
 
-    public function HeatmapTrackOrder( $order_id ) {
+    private function initCheck($order_id, $idSite = null, $total = null) {
 
         if ( !$order_id ) {
             return;
         }
+
+        if($idSite && $total) {
+            return [
+                'quicktransaction'  => 1,
+                'revenue'           => $total,
+                'idsite'            => $idSite,
+                'idorder'           => $order_id,
+                'status'            => 'completed',
+                '_id'               => $_COOKIE['mr_vid'] ?? null,
+                'device_type'       => $_SERVER['HTTP_USER_AGENT'] ?? null
+            ];
+        }
     
         $apiData = get_option($this->option_name);
-        $apiData = !is_array($apiData) ? json_decode($apiData, true) : $apiData;
+
+        return !is_array($apiData) ? json_decode($apiData, true) : $apiData;
+
+    }
+ 
+    public function HeatmapWoocommerceOrder( $order_id ) {
+
+        $apiData = $this->initCheck($order_id);
     
         if(isset($apiData['idsite'])) {
     
@@ -181,19 +201,11 @@ class HeatmapTracker {
     
             // This is the order total
             $revenue = $order->get_total();
-            
-            $order_data = [
-                'idorder'           => $order_id,
-                'idsite'            => $apiData['idsite'],
-                'status'            => 'completed',
-                '_id'               => $_COOKIE['mr_vid'] ?? null,
-                'revenue'           => $revenue,
-                'quicktransaction'  => 1,
-                'device_type'       => $_SERVER['HTTP_USER_AGENT'] ?? null
-            ];
-    
-            $items = [];
-        
+
+            $order_data = $this->initCheck($order_id, $apiData['idsite'], $revenue);
+            $order_data['shipment'] = $order->get_shipping_total();
+            $order_data['discount'] = $order->get_discount_total();
+
             // This loops over line items
             foreach ( $order->get_items() as $item ) {
                 // This will be a product
@@ -207,13 +219,42 @@ class HeatmapTracker {
                 ];
             }
     
-            $order_data['items'] = $items;
+            $order_data['items'] = $items ?? [];
     
             // push the data to the api
             $this->HeatmapCURL($this->HeatmapURL(HEATMAP_APP_URL, true) . "/sttracker.php", json_encode($order_data));
     
         }
     
+    }
+
+    public function HeatmapEasyDigitalOrder( $order_id ) {
+
+        $apiData = $this->initCheck($order_id);
+
+        if(isset($apiData['idsite'])) {
+
+            $orderData = edd_get_payment_meta( $order_id );
+
+            $order_data = $this->initCheck($order_id, $apiData['idsite'], $orderData['total']);
+
+            $cart_items = edd_get_payment_meta_cart_details( $order_id );
+
+            foreach ( $cart_items as $product ) {
+                $items[] = [
+                    'price' => $product['subtotal'],
+                    'title' => $product['name'],
+                    'quantity' => $product['quantity']
+                ];
+            }
+
+            $order_data['items'] = $items ?? [];
+
+            // push the data to the api
+            $this->HeatmapCURL($this->HeatmapURL(HEATMAP_APP_URL, true) . "/sttracker.php", json_encode($order_data));
+
+        }
+
     }
 
     public function HeatmapOrderCompleted( $order_id ) {

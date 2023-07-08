@@ -83,6 +83,7 @@
                                 if(response == 'option_updated') {
                                     window.location.href = "";
                                 } else {
+                                    $(`div[class~="notice-error"]`).html(`<strong>Sorry! We could not validate your website url. Please try again later.</strong>`);
                                     $(`button[data-heatmap_plugin="activate"]`).prop("disabled", false);
                                 }
                             }).fail((err) => {
