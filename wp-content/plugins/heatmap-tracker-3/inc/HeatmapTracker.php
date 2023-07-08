@@ -31,7 +31,12 @@ class HeatmapTracker {
 
         if(!empty($this->plugin_option)) {
             add_action('wp_head', [$this, 'HeatmapHeatagScript'], 10);
-            add_action('woocommerce_checkout_order_processed', [$this, 'HeatmapTrackOrder'], 5, 1);
+            if ( has_action( 'woocommerce_checkout_order_processed' ) ) {
+                add_action('woocommerce_checkout_order_processed', [$this, 'HeatmapTrackOrder'], 5, 1);
+            }
+            if( has_action('woocommerce_checkout_order_processed') ) {
+                add_action('edd_complete_purchase', ['pw_edd_on_complete_purchase']);
+            }
 
             foreach(['refunded', 'failed', 'cancelled', 'completed'] as $status) {
                 $actionHook = "woocommerce_order_status_{$status}";
