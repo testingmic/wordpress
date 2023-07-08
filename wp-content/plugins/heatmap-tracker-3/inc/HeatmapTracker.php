@@ -12,7 +12,7 @@ class HeatmapTracker {
     public $plugin_option;
     public $site_name = 'Heatmap.com';
     public $option_name = '_heatmap_data';
-    public $plugin_label = 'Heamap Tracker';
+    public $plugin_label = 'Heatmap.com';
     public $plugin_name = 'heatmap-tracker';
 
     public $description = 'Heatmap.com is a premium heatmap solution that tracks revenue from clicks, 
@@ -139,15 +139,23 @@ class HeatmapTracker {
         $idSite = $this->HeatmapGetIdSite($apiURL, false, $heatURL);
         if($idSite > 0) {
         ?>
+        <!-- heatmap.com snippet -->
         <script>
+        (function() {      
             var _paq = window._paq = window._paq || [];
-            var heatUrl = "<?= $heatURL; ?>";
-            var heatENV = {};
-            (function() {
+            var heatUrl = window.heatUrl = '<?= $heatURL; ?>';
+            function loadScript(url) {
+            var script = document.createElement('script'); script.type = 'text/javascript'; 
+            script.src = url; script.async = false; script.defer = true; document.head.appendChild(script);
+            }
+            loadScript(heatUrl+'preprocessor.min.js?sid=<?= $idSite ?>');
+            window.addEventListener('DOMContentLoaded', function (){	 
+                if(typeof paq != 'object' || paq.length == 0) {     
                 _paq.push(['setTrackerUrl', heatUrl+'sttracker.php']);
-                var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-                g.async=true; g.src=heatUrl+'heatmap.js?sid=<?= $idSite ?>'; s.parentNode.insertBefore(g,s);
-            })();
+                loadScript(heatUrl+'heatmap-light.min.js?sid=<?= $idSite ?>'); 
+                } 
+            });
+        })();
         </script>
         <?php
         }

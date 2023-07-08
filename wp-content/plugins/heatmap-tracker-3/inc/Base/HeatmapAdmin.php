@@ -10,7 +10,7 @@ class HeatmapAdmin extends HeatmapTracker {
             'administrator', $this->plugin_name, 
             [$this, 'DisplayHeatmapAdminDashboard'], 'dashicons-chart-area', 70
         );
-        wp_enqueue_style('heatmap', $this->plugin_url . $this->plugin_name . '/templates/assets/style.css');
+        wp_enqueue_style('heatmap', $this->plugin_url . HT_DIR_NAME . '/templates/assets/style.css');
     }
 
     public function HeatmapAdminSettingLink( array $links ) {

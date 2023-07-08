@@ -26,11 +26,12 @@ if(!function_exists('wp_get_current_user')) {
     include(ABSPATH . "wp-includes/pluggable.php"); 
 }
 
-defined('HEATMAP_APP_URL') or define('HEATMAP_APP_URL', 'http://localhost/index.php?module=API&method=PaymentIntegration.getIdByURL&platform=WordPress');
+defined('HEATMAP_APP_URL') or define('HEATMAP_APP_URL', 'https://dashboard.heatmap.com/index.php?module=API&method=PaymentIntegration.getIdByURL&platform=wordpress');
 
 // Include the main HeatmapTracker class.
 if ( ! defined( 'HT_PLUGIN_FILE' ) ) {
 	define( 'HT_PLUGIN_FILE', __DIR__ );
+	define( 'HT_DIR_NAME', basename(dirname(__FILE__)));
 	define( 'HT_PLUGIN_ROOT_DIR', plugin_basename(__FILE__));
 }
 

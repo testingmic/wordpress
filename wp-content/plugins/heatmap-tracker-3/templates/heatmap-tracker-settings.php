@@ -2,7 +2,7 @@
     <div class="heatmap-wrapper">
         <div class="wrapper-header">
             <div id="logo-link" class="flex items-center gap-3">
-                <img src="<?= $variables['plugin_url'] . $variables['plugin_name'] ?>/templates/assets/Vector.svg" alt="">
+                <img src="https://app.heatmap.com/assets/logo.svg" alt="">
                 <p class="text-secondary"><?= $variables['site_name'] ?></p>
             </div>
             <div><?= $variables['description']; ?></div>
